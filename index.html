@@ -1,0 +1,44 @@
+<canvas id="myChart" width="800" height="600"></canvas>
+<script src="Chart.bundle.min.js"></script>
+<script src="moment.js"></script>
+<script>
+var chart_data = [];
+
+//Creating the chart
+var ctx = document.getElementById("myChart");
+var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+    	datasets: [{
+    		label: "Sum",
+    		data: chart_data
+    	}]
+    },
+    options: {
+  		label: "Sum chart",
+   		responsive: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }],
+            xAxes: [{
+                type: 'time',
+            }]
+        }
+    }
+});
+
+//Connecting the webpage with the server
+var connection = new WebSocket("ws://127.0.0.1:27878");
+
+//Updating the chart when there is a new record
+connection.onmessage = function(data) {
+	var current_time = moment().format();
+	console.log('Received: ' + data.data + " on: " + current_time );
+	chart_data.push({x:current_time,y:Number(data.data)});
+	chart.data.datasets[0].data = chart_data;
+	chart.update();
+};
+</script>
